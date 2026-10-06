@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CeylonBot Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); min-height:100vh; color:#e0e0e0; padding:30px; }
+        h1 { text-align:center; margin-bottom:10px; color:#fff; }
+        .subtitle { text-align:center; color:#4facfe; margin-bottom:30px; font-size:14px; }
+        .subtitle a { color:#00f2fe; text-decoration:none; }
+        .tabs { display:flex; gap:10px; justify-content:center; margin-bottom:30px; }
+        .tab-btn { padding:10px 24px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#ccc; border-radius:10px; cursor:pointer; transition:all .3s; }
+        .tab-btn.active, .tab-btn:hover { background:linear-gradient(135deg,#4facfe,#00f2fe); color:#fff; border-color:transparent; }
+        .panel { display:none; max-width:900px; margin:0 auto; }
+        .panel.active { display:block; }
+        .form-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:24px; margin-bottom:24px; }
+        .form-card h3 { margin-bottom:16px; color:#4facfe; }
+        .form-row { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+        .form-row input, .form-row textarea, .form-row select { flex:1; min-width:200px; padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#fff; font-size:14px; outline:none; }
+        .form-row textarea { min-height:80px; resize:vertical; }
+        .form-row input:focus, .form-row textarea:focus { border-color:#4facfe; }
+        .btn { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-size:14px; transition:all .2s; }
+        .btn-primary { background:linear-gradient(135deg,#4facfe,#00f2fe); color:#fff; }
+        .btn-danger { background:#e74c3c; color:#fff; }
+        .btn:hover { transform:scale(1.03); }
+        table { width:100%; border-collapse:collapse; margin-top:16px; }
+        th { text-align:left; padding:10px; color:#4facfe; border-bottom:1px solid rgba(255,255,255,0.1); font-size:13px; }
+        td { padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; max-width:300px; overflow:hidden; text-overflow:ellipsis; }
+        .toast { position:fixed; top:20px; right:20px; padding:14px 24px; background:#27ae60; color:#fff; border-radius:10px; display:none; z-index:999; animation:fadeIn .3s; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+        .stats { display:flex; gap:16px; justify-content:center; margin-bottom:30px; }
+        .stat-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px 28px; text-align:center; }
+        .stat-card .num { font-size:28px; font-weight:600; color:#4facfe; }
+        .stat-card .label { font-size:12px; color:#aaa; margin-top:4px; }
+    </style>
+</head>
+<body>
+    <h1>🛠️ CeylonBot Admin Panel</h1>
+    <p class="subtitle">Manage your chatbot's knowledge base &bull; <a href="/">← Back to Chat</a></p>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('knowledge')">📚 Domain Knowledge</button>
+        <button class="tab-btn" onclick="showTab('packages')">📦 Tour Packages</button>
+        <button class="tab-btn" onclick="showTab('learned')">🧠 Learned Q&A</button>
+    </div>
+
+    <!-- Domain Knowledge Panel -->
+    <div class="panel active" id="panel-knowledge">
+        <div class="form-card">
+            <h3>Add Domain Knowledge</h3>
+            <div class="form-row"><input id="dk-q" placeholder="Question (e.g. What is the best beach?)"><input id="dk-cat" placeholder="Category (e.g. destinations)"></div>
+            <div class="form-row"><textarea id="dk-a" placeholder="Answer"></textarea></div>
+            <div class="form-row"><input id="dk-kw" placeholder="Keywords (comma separated, e.g. beach, coast, sea)"></div>
+            <button class="btn btn-primary" onclick="addKnowledge()">Add Knowledge</button>
+        </div>
+        <div class="form-card"><h3>Existing Domain Knowledge</h3><table id="knowledge-table"><thead><tr><th>ID</th><th>Question</th><th>Answer</th><th>Category</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- Packages Panel -->
+    <div class="panel" id="panel-packages">
+        <div class="form-card">
+            <h3>Add Tour Package</h3>
+            <div class="form-row"><input id="pkg-name" placeholder="Package Name"><input id="pkg-dest" placeholder="Destination"></div>
+            <div class="form-row"><textarea id="pkg-desc" placeholder="Description"></textarea></div>
+            <div class="form-row"><input id="pkg-price" placeholder="Price (e.g. $100)"><input id="pkg-dur" placeholder="Duration (e.g. 2 Days)"><input id="pkg-cat" placeholder="Category (e.g. Beach)"></div>
+            <button class="btn btn-primary" onclick="addPackage()">Add Package</button>
+        </div>
+        <div class="form-card"><h3>Existing Packages</h3><table id="packages-table"><thead><tr><th>ID</th><th>Name</th><th>Destination</th><th>Price</th><th>Duration</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- Learned Q&A Panel -->
+    <div class="panel" id="panel-learned">
+        <div class="form-card"><h3>User-Taught Knowledge (Learned via Chat)</h3><p style="color:#aaa;margin-bottom:12px">These are facts users taught the bot during conversations.</p><table id="learned-table"><thead><tr><th>ID</th><th>Question</th><th>Answer</th><th>Category</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+    function showTab(name) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('panel-' + name).classList.add('active');
+        event.target.classList.add('active');
+    }
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2500);
+    }
+
+    // ---- Load Data ----
+    async function loadAll() {
+        const [pkgs, knowledge, learned] = await Promise.all([
+            fetch('/api/packages').then(r=>r.json()),
+            fetch('/api/knowledge').then(r=>r.json()),
+            fetch('/api/learned').then(r=>r.json()),
+        ]);
+        renderPackages(pkgs); renderKnowledge(knowledge); renderLearned(learned);
+        document.getElementById('stats').innerHTML =
+            `<div class="stat-card"><div class="num">${knowledge.length}</div><div class="label">Domain Facts</div></div>` +
+            `<div class="stat-card"><div class="num">${pkgs.length}</div><div class="label">Tour Packages</div></div>` +
+            `<div class="stat-card"><div class="num">${learned.length}</div><div class="label">Learned Facts</div></div>`;
+    }
+
+    function renderPackages(data) {
+        const tb = document.querySelector('#packages-table tbody');
+        tb.innerHTML = data.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td><td>${p[4]}</td><td>${p[5]}</td><td><button class="btn btn-danger" onclick="delPkg(${p[0]})">Delete</button></td></tr>`).join('');
+    }
+    function renderKnowledge(data) {
+        const tb = document.querySelector('#knowledge-table tbody');
+        tb.innerHTML = data.map(k => `<tr><td>${k[0]}</td><td>${k[1]}</td><td>${k[2].substring(0,80)}...</td><td>${k[3]}</td><td><button class="btn btn-danger" onclick="delKnowledge(${k[0]})">Delete</button></td></tr>`).join('');
+    }
+    function renderLearned(data) {
+        const tb = document.querySelector('#learned-table tbody');
+        tb.innerHTML = data.map(l => `<tr><td>${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td><button class="btn btn-danger" onclick="delLearned(${l[0]})">Delete</button></td></tr>`).join('');
+    }
+
+    // ---- Add ----
+    async function addKnowledge() {
+        await fetch('/api/knowledge', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+            question: document.getElementById('dk-q').value,
+            answer: document.getElementById('dk-a').value,
+            category: document.getElementById('dk-cat').value,
+            keywords: document.getElementById('dk-kw').value
+        })});
+        toast('Knowledge added!'); loadAll();
+        document.getElementById('dk-q').value=''; document.getElementById('dk-a').value=''; document.getElementById('dk-cat').value=''; document.getElementById('dk-kw').value='';
+    }
+    async function addPackage() {
+        await fetch('/api/packages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+            name: document.getElementById('pkg-name').value, destination: document.getElementById('pkg-dest').value,
+            description: document.getElementById('pkg-desc').value, price: document.getElementById('pkg-price').value,
+            duration: document.getElementById('pkg-dur').value, category: document.getElementById('pkg-cat').value
+        })});
+        toast('Package added!'); loadAll();
+        ['pkg-name','pkg-dest','pkg-desc','pkg-price','pkg-dur','pkg-cat'].forEach(id => document.getElementById(id).value='');
+    }
+
+    // ---- Delete ----
+    async function delPkg(id) { await fetch('/api/packages/'+id,{method:'DELETE'}); toast('Deleted'); loadAll(); }
+    async function delKnowledge(id) { await fetch('/api/knowledge/'+id,{method:'DELETE'}); toast('Deleted'); loadAll(); }
+    async function delLearned(id) { await fetch('/api/learned/'+id,{method:'DELETE'}); toast('Deleted'); loadAll(); }
+
+    loadAll();
+    </script>
+</body>
+</html>

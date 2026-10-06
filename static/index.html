@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Lanka Tour Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar with info and Avatar -->
+        <aside class="sidebar">
+            <div class="avatar-container">
+                <div class="avatar" id="avatar">
+                    <img src="/static/Logo.png" alt="CeylonBot" class="logo-img" id="face">
+                </div>
+                <h1 class="bot-name">CeylonBot</h1>
+                <p class="status">Your Sri Lankan Travel Guide</p>
+            </div>
+            <div class="info-box">
+                <p>Welcome! I can help you plan your trip to Sri Lanka.</p>
+                <p><strong>Try asking:</strong></p>
+                <ul>
+                    <li>"What packages do you have?"</li>
+                    <li>"Show me tour options"</li>
+                    <li>Or teach me something new!</li>
+                </ul>
+            </div>
+            <a href="/admin" class="admin-link">🛠️ Admin Panel</a>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container">
+            <div class="chat-header">
+                <h2>Chat Session</h2>
+            </div>
+            
+            <div class="messages" id="messages">
+                <!-- Initial greeting message -->
+                <div class="message bot">
+                    <div class="bubble">Ayubowan! Welcome to Sri Lanka Tours. How can I help you today?</div>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off" autofocus>
+                <button id="sendBtn">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="send-icon"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
